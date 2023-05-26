@@ -17,7 +17,7 @@ TAGS = {
     "Rap": "说唱"
 }
 
-TYPE = {"movie": 1, "show": 2, "artist": 8}
+TYPE = {"movie": 1, "show": 2, "artist": 8,"photo":99}  #99随手写的，不知道官方代码是多少
 
 config_file: Path = Path(__file__).parent / 'config.ini'
 
@@ -171,41 +171,44 @@ class PlexServer:
         print(library_list)
         # select = self.select_library()
         for ll in library_list:
-            select = ll
-            print(select)
-            media_keys = self.list_media_keys(select)
+            if ll[1] != 99:
+                select = ll
+                print(select)
+                media_keys = self.list_media_keys(select)
 
-            for rating_key in media_keys:
-                metadata = self.get_metadata(rating_key)
-                title = metadata["title"]
-                title_sort = metadata.get("titleSort", "")
-                genres = [genre.get("tag") for genre in metadata.get('Genre', {})]
-                styles = [style.get("tag") for style in metadata.get('Style', {})]
-                moods = [mood.get("tag") for mood in metadata.get('Mood', {})]
+                for rating_key in media_keys:
+                    metadata = self.get_metadata(rating_key)
+                    title = metadata["title"]
+                    title_sort = metadata.get("titleSort", "")
+                    genres = [genre.get("tag") for genre in metadata.get('Genre', {})]
+                    styles = [style.get("tag") for style in metadata.get('Style', {})]
+                    moods = [mood.get("tag") for mood in metadata.get('Mood', {})]
 
-                if select[1] != 10:
-                    if has_chinese(title_sort) or title_sort == "":
-                        title_sort = convert_to_pinyin(title)
-                        self.put_title_sort(select, rating_key, title_sort, 1)
-                        print(f"{title} < {title_sort} >")
+                    if select[1] != 10:
+                        if has_chinese(title_sort) or title_sort == "":
+                            title_sort = convert_to_pinyin(title)
+                            self.put_title_sort(select, rating_key, title_sort, 1)
+                            print(f"{title} < {title_sort} >")
 
-                if select[1] != 10:
-                    for genre in genres:
-                        if new_genre := TAGS.get(genre):
-                            self.put_genres(select, rating_key, genre, new_genre)
-                            print(f"{title} : {genre} → {new_genre}")
+                    if select[1] != 10:
+                        for genre in genres:
+                            if new_genre := TAGS.get(genre):
+                                self.put_genres(select, rating_key, genre, new_genre)
+                                print(f"{title} : {genre} → {new_genre}")
 
-                if select[1] in [8, 9]:
-                    for style in styles:
-                        if new_style := TAGS.get(style):
-                            self.put_styles(select, rating_key, style, new_style)
-                            print(f"{title} : {style} → {new_style}")
+                    if select[1] in [8, 9]:
+                        for style in styles:
+                            if new_style := TAGS.get(style):
+                                self.put_styles(select, rating_key, style, new_style)
+                                print(f"{title} : {style} → {new_style}")
 
-                if select[1] in [8, 9, 10]:
-                    for mood in moods:
-                        if new_mood := TAGS.get(mood):
-                            self.put_styles(select, rating_key, mood, new_mood)
-                            print(f"{title} : {mood} → {new_mood}")
+                    if select[1] in [8, 9, 10]:
+                        for mood in moods:
+                            if new_mood := TAGS.get(mood):
+                                self.put_styles(select, rating_key, mood, new_mood)
+                                print(f"{title} : {mood} → {new_mood}")
+            else:
+                continue
 
 
 if __name__ == '__main__':
